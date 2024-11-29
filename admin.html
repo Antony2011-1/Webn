@@ -39,7 +39,8 @@
         .admin-container button:hover {
             background-color: #6a1b9a;
         }
-        .admin-container input[type="text"] {
+        .admin-container input[type="text"],
+        .admin-container input[type="password"] {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -89,6 +90,7 @@
         <hr>
         <form id="delete-user-form">
             <input type="text" id="username-to-delete" placeholder="Username to delete" required>
+            <input type="password" id="password-to-delete" placeholder="User's Password" required>
             <button type="submit">Delete User</button>
         </form>
         <p id="delete-status"></p>
@@ -159,15 +161,21 @@
         document.getElementById('delete-user-form').addEventListener('submit', function(event) {
             event.preventDefault();
             const usernameToDelete = document.getElementById('username-to-delete').value;
+            const passwordToDelete = document.getElementById('password-to-delete').value;
 
             let users = JSON.parse(localStorage.getItem('users')) || [];
-            users = users.filter(user => user.username !== usernameToDelete);
-            localStorage.setItem('users', JSON.stringify(users));
+            const userIndex = users.findIndex(user => user.username === usernameToDelete && user.password === passwordToDelete);
 
-            document.getElementById('delete-status').innerText = `User ${usernameToDelete} deleted successfully.`;
-            fetchUserCount();
-            document.getElementById('user-list').innerHTML = '';
-            fetchUserList();
+            if (userIndex > -1) {
+                users.splice(userIndex, 1);
+                localStorage.setItem('users', JSON.stringify(users));
+                document.getElementById('delete-status').innerText = `User ${usernameToDelete} deleted successfully.`;
+                fetchUserCount();
+                document.getElementById('user-list').innerHTML = '';
+                fetchUserList();
+            } else {
+                document.getElementById('delete-status').innerText = `Incorrect username or password.`;
+            }
         });
 
         // Manejar la eliminación de claves usadas
