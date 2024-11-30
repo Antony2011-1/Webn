@@ -5,9 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
     <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes buttonHover {
+            0% { background-color: #202020; }
+            50% { background-color: #505050; }
+            100% { background-color: #202020; }
+        }
+
+        @keyframes changeColor {
+            0% { color: blue; }
+            25% { color: red; }
+            50% { color: yellow; }
+            75% { color: green; }
+            100% { color: blue; }
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background-color: #6a1b9a;
+            background-color: #151515;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -25,19 +52,24 @@
         }
         .admin-container h2 {
             margin-bottom: 20px;
-            color: #4a148c;
+            color: blue;
+            animation: changeColor 5s infinite;
         }
         .admin-container button {
-            background-color: #4a148c;
+            background-color: #202020;
             color: #fff;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             margin: 10px 0;
+            animation: fadeIn 1s ease-in-out;
+            animation-delay: 0.5s;
+            transition: transform 0.2s;
         }
         .admin-container button:hover {
-            background-color: #6a1b9a;
+            background-color: #151515;
+            animation: buttonHover 1s infinite;
         }
         .admin-container input[type="text"],
         .admin-container input[type="password"] {
@@ -60,7 +92,7 @@
             text-align: left;
         }
         .admin-container th {
-            background-color: #4a148c;
+            background-color: #202020;
             color: white;
         }
         .admin-container p {
@@ -81,6 +113,7 @@
                     <th>Username</th>
                     <th>Password</th>
                     <th>HWID</th>
+                    <th>IP</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -108,6 +141,18 @@
         </table>
     </div>
     <script>
+        // Obtener la IP pública del usuario
+        async function getUserIP() {
+            try {
+                const response = await fetch('https://api.ipify.org?format=json');
+                const data = await response.json();
+                return data.ip;
+            } catch (error) {
+                console.error('Error obteniendo la IP:', error);
+                return 'N/A';
+            }
+        }
+
         // Verificar si el administrador ha iniciado sesión
         window.onload = function() {
             const adminLoggedIn = sessionStorage.getItem('adminLoggedIn');
@@ -127,38 +172,43 @@
         }
 
         // Mostrar la lista de usuarios
-        function fetchUserList() {
+        async function fetchUserList() {
             const users = JSON.parse(localStorage.getItem('users')) || [];
             const userList = document.getElementById('user-list');
 
-            users.forEach(user => {
+            userList.innerHTML = ''; // Limpiar lista antes de actualizar
+
+            for (const user of users) {
                 const row = document.createElement('tr');
                 const usernameCell = document.createElement('td');
                 const passwordCell = document.createElement('td');
                 const hwidCell = document.createElement('td');
+                const ipCell = document.createElement('td');
                 const actionCell = document.createElement('td');
-                
+
                 usernameCell.innerText = user.username;
                 passwordCell.innerText = user.password;
                 hwidCell.innerText = user.hwid || 'N/A';
-                
+                ipCell.innerText = user.ip || await getUserIP(); // Obtener IP si no existe
+
                 const resetButton = document.createElement('button');
                 resetButton.innerText = 'Reset HWID';
-                resetButton.onclick = function() {
+                resetButton.onclick = function () {
                     resetHWID(user.username);
                 };
                 actionCell.appendChild(resetButton);
-                
+
                 row.appendChild(usernameCell);
                 row.appendChild(passwordCell);
                 row.appendChild(hwidCell);
+                row.appendChild(ipCell);
                 row.appendChild(actionCell);
                 userList.appendChild(row);
-            });
+            }
         }
 
         // Manejar la eliminación de usuarios
-        document.getElementById('delete-user-form').addEventListener('submit', function(event) {
+        document.getElementById('delete-user-form').addEventListener('submit', function (event) {
             event.preventDefault();
             const usernameToDelete = document.getElementById('username-to-delete').value;
             const passwordToDelete = document.getElementById('password-to-delete').value;
@@ -171,45 +221,11 @@
                 localStorage.setItem('users', JSON.stringify(users));
                 document.getElementById('delete-status').innerText = `User ${usernameToDelete} deleted successfully.`;
                 fetchUserCount();
-                document.getElementById('user-list').innerHTML = '';
                 fetchUserList();
             } else {
                 document.getElementById('delete-status').innerText = `Incorrect username or password.`;
             }
         });
-
-        // Manejar la eliminación de claves usadas
-        function deleteKey(key) {
-            let usedKeys = JSON.parse(localStorage.getItem('usedKeys')) || [];
-            usedKeys = usedKeys.filter(usedKey => usedKey !== key);
-            localStorage.setItem('usedKeys', JSON.stringify(usedKeys));
-            document.getElementById('key-list').innerHTML = '';
-            fetchKeyList();
-        }
-
-        // Mostrar la lista de claves usadas
-        function fetchKeyList() {
-            const usedKeys = JSON.parse(localStorage.getItem('usedKeys')) || [];
-            const keyList = document.getElementById('key-list');
-
-            usedKeys.forEach(key => {
-                const row = document.createElement('tr');
-                const keyCell = document.createElement('td');
-                const actionCell = document.createElement('td');
-                
-                keyCell.innerText = key;
-                const deleteButton = document.createElement('button');
-                deleteButton.innerText = 'Delete';
-                deleteButton.onclick = function() {
-                    deleteKey(key);
-                };
-                actionCell.appendChild(deleteButton);
-                
-                row.appendChild(keyCell);
-                row.appendChild(actionCell);
-                keyList.appendChild(row);
-            });
-        }
 
         // Resetear HWID del usuario
         function resetHWID(username) {
@@ -221,8 +237,42 @@
                 return user;
             });
             localStorage.setItem('users', JSON.stringify(users));
-            document.getElementById('user-list').innerHTML = '';
             fetchUserList();
+        }
+
+        // Manejar la eliminación de claves usadas
+        function deleteKey(key) {
+            let usedKeys = JSON.parse(localStorage.getItem('usedKeys')) || [];
+            usedKeys = usedKeys.filter(usedKey => usedKey !== key);
+            localStorage.setItem('usedKeys', JSON.stringify(usedKeys));
+            fetchKeyList();
+        }
+
+        // Mostrar la lista de claves usadas
+        function fetchKeyList() {
+            const usedKeys = JSON.parse(localStorage.getItem('usedKeys')) || [];
+            const keyList = document.getElementById('key-list');
+
+            keyList.innerHTML = ''; // Limpiar lista antes de actualizar
+
+            usedKeys.forEach(key => {
+                const row = document.createElement('tr');
+                const keyCell = document.createElement('td');
+                const actionCell = document.createElement('td');
+
+                keyCell.innerText = key;
+
+                const deleteButton = document.createElement('button');
+                deleteButton.innerText = 'Delete';
+                deleteButton.onclick = function () {
+                    deleteKey(key);
+                };
+                actionCell.appendChild(deleteButton);
+
+                row.appendChild(keyCell);
+                row.appendChild(actionCell);
+                keyList.appendChild(row);
+            });
         }
     </script>
 </body>
