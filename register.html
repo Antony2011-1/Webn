@@ -5,9 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
     <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes buttonHover {
+            0% { background-color: #151515; }
+            50% { background-color: #505050; }
+            100% { background-color: #151515; }
+        }
+
+        @keyframes pulsate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background-color: #6a1b9a;
+            background-color: #151515;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -20,10 +45,12 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
+            animation: fadeIn 1s ease-in-out;
         }
         .register-container h2 {
             margin-bottom: 20px;
-            color: #4a148c;
+            color: #151515;
+            animation: fadeIn 1.5s ease-in-out;
         }
         .register-container input[type="text"],
         .register-container input[type="password"] {
@@ -32,20 +59,31 @@
             margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
+            animation: fadeIn 1s ease-in-out;
+            animation-delay: 0.5s;
         }
         .register-container button {
-            background-color: #4a148c;
+            background-color: #151515;
             color: #fff;
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            animation: fadeIn 1s ease-in-out;
+            animation-delay: 0.8s;
+            transition: transform 0.2s;
         }
         .register-container button:hover {
-            background-color: #6a1b9a;
+            animation: buttonHover 1s infinite;
+        }
+        .register-container input:focus {
+            animation: pulsate 0.5s infinite;
+        }
+        .register-container input.invalid {
+            animation: shake 0.5s;
         }
         .register-container a {
-            color: #4a148c;
+            color: #202020;
             text-decoration: none;
         }
         .register-container a:hover {
@@ -105,6 +143,12 @@
                 }
             } else {
                 alert('Passwords do not match!');
+                document.getElementById('password').classList.add('invalid');
+                document.getElementById('confirm-password').classList.add('invalid');
+                setTimeout(() => {
+                    document.getElementById('password').classList.remove('invalid');
+                    document.getElementById('confirm-password').classList.remove('invalid');
+                }, 500);
             }
         });
     </script>
