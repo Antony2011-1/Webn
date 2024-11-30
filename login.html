@@ -5,9 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes buttonHover {
+            0% { background-color: #202020; }
+            50% { background-color: #505050; }
+            100% { background-color: #202020; }
+        }
+
+        @keyframes pulsate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background-color: #6a1b9a;
+            background-color: #151515;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -16,33 +41,50 @@
         }
         .login-container {
             background-color: rgba(255, 255, 255, 0.3);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
             text-align: center;
+            animation: fadeIn 1s ease-in-out;
+            width: 450px;
         }
         .login-container h2 {
-            margin-bottom: 20px;
-            color: #4a148c;
+            margin-bottom: 25px;
+            color: #151515;
+            animation: fadeIn 1.5s ease-in-out;
+            font-size: 2.2em;
         }
         .login-container input[type="text"],
         .login-container input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
+            width: 90%; /* Ajustamos el ancho */
+            padding: 15px;
+            margin: 15px auto; /* Centramos el margen */
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: 8px;
+            animation: fadeIn 1s ease-in-out;
+            animation-delay: 0.5s;
+            font-size: 1.1em;
         }
         .login-container button {
-            background-color: #4a148c;
+            background-color: #202020;
             color: #fff;
-            padding: 10px 20px;
+            padding: 15px 30px;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
+            animation: fadeIn 1s ease-in-out;
+            animation-delay: 0.8s;
+            transition: transform 0.2s;
+            font-size: 1.1em;
         }
         .login-container button:hover {
-            background-color: #6a1b9a;
+            animation: buttonHover 1s infinite;
+        }
+        .login-container input:focus {
+            animation: pulsate 0.5s infinite;
+        }
+        .login-container input.invalid {
+            animation: shake 0.5s;
         }
     </style>
 </head>
@@ -91,6 +133,12 @@
                 window.location.href = 'home.html'; // Cambia 'home.html' por la página a la que quieras redirigir después de iniciar sesión
             } else {
                 alert('Invalid username or password!');
+                document.getElementById('login-username').classList.add('invalid');
+                document.getElementById('login-password').classList.add('invalid');
+                setTimeout(() => {
+                    document.getElementById('login-username').classList.remove('invalid');
+                    document.getElementById('login-password').classList.remove('invalid');
+                }, 500);
             }
         });
     </script>
